@@ -1,0 +1,53 @@
+Program is running with following parameters :
+Dictionnary  : OGD_communs_linux.txt
+Wordsize     : 7
+Nb threads   : 1
+Nb procs MPI : 4
+First workitem = 8647
+Last workitem = 192
+Thread working 
+[2] treating word cacabee
+First workitem = 8647
+Last workitem = 192
+Thread working 
+First workitem = 8647
+Last workitem = 192
+[Thread working 1] treating word 
+cacarda
+[0] treating word cacabas
+First workitem = 8647
+Last workitem = 192
+Thread working 
+[3] treating word cacaber
+================
+cacabee
+abatant
+canisse
+alentit
+bottela
+enterai
+reerais
+================
+cacabee
+abatant
+canisse
+alentit
+bottela
+enterai
+reerait
+================
+cacaber
+abalone
+canette
+atinter
+bastera
+ensilai
+sterais
+================
+cacaber
+abalone
+canette
+atinter
+bastera
+ensilai
+sterait

@@ -1,0 +1,21 @@
+Program is running with following parameters :
+Dictionnary  : OGD_communs_linux.txt
+Wordsize     : 8
+Nb threads   : 1
+Nb procs MPI : 4
+First workitem = 14007
+Last workitem = 200
+Thread working 
+[1] treating word cacardee
+First workitem = 14007
+Last workitem = 200
+Thread working 
+First workitem = 14007
+Last workitem = 200
+Thread working 
+First workitem = 14007
+Last workitem = 200
+[2] treating word accapare
+[3] treating word cacarderThread working 
+
+[0] treating word accapara
