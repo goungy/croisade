@@ -1,0 +1,6 @@
+dictionary_file dicts/OGD_fusionne_linux.txt
+word_size 4
+solver_type Stephane
+saved_solver_state_version 0.1
+saved_solver_state_date None
+saved_solver_state_instances None
