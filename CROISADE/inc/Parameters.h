@@ -19,6 +19,8 @@ class Parameters
 public:
 	void read_parameters_from_txt_file(const string & filepath);
 	string get_parameter(const string & parameter_name) const;
+	int get_word_size() const{ return atoi(get_parameter("word_size").c_str());}
+	string get_dictionary_file() const{ return get_parameter("dictionary_file");}
 	bool parameter_exists(const string & parameter_name) const;
 	void display_parameters() const;
 private:
