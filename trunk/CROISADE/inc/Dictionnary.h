@@ -11,7 +11,7 @@
 
 #include <vector>
 #include <string>
-#include "Tree.h"
+//#include "Tree.h"
 
 using namespace std;
 
@@ -23,19 +23,19 @@ public:
 	void str();
 
 	int findFirstIndexOfPrefix(const string & prefix) const;
-	const Tree * findFirstNodeOfPrefix(const string & prefix) const;
+	//const Tree * findFirstNodeOfPrefix(const string & prefix) const;
 	inline int linearSearch(const string & prefix) const;
 	inline int binarySearch(const string & prefix) const;
-	inline int binaryTreeSearch(const string & prefix) const;
-	void analyze_shared_prefix();
+	//inline int binaryTreeSearch(const string & prefix) const;
+	//void analyze_shared_prefix();
 
 	virtual ~Dictionnary();
 
 	vector<string> words_;
-	vector<vector<int> > shared_prefix;
+	//vector<vector<int> > shared_prefix;
 	unsigned int wordsSize_;
 	unsigned int wordsNumber_;
-	Tree tree;
+	//Tree tree;
 };
 
 #endif /* DICTIONNARY_H_ */

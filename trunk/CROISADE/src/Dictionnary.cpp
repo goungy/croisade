@@ -23,12 +23,12 @@ Dictionnary::Dictionnary(string filename, int word_size)
 	wordsSize_ = word_size ;
 	this->readfile(filename);
 	sort(this->words_.begin(),this->words_.end());
-	this->tree.create_tree(this->words_);
-	this->shared_prefix.resize(this->wordsNumber_);
-	for (unsigned int i = 0 ; i < this->wordsNumber_ ;i++)
-		this->shared_prefix[i].assign(word_size,-1);
+	//this->tree.create_tree(this->words_);
+	//this->shared_prefix.resize(this->wordsNumber_);
+	//for (unsigned int i = 0 ; i < this->wordsNumber_ ;i++)
+	//	this->shared_prefix[i].assign(word_size,-1);
 
-	this->analyze_shared_prefix();
+	//this->analyze_shared_prefix();
 /*
 	for (unsigned int i = 0 ; i < this->wordsNumber_ ;i++)
 	{
@@ -45,7 +45,7 @@ Dictionnary::Dictionnary(string filename, int word_size)
 	*/
 	//exit(0);
 }
-
+/*
 void Dictionnary::analyze_shared_prefix()
 {
 //REMARK : for last word, everything is set @ -1.
@@ -76,7 +76,7 @@ void Dictionnary::analyze_shared_prefix()
 
 	}
 }
-
+*/
 inline int Dictionnary::linearSearch(const string & prefix) const
 {
 	int index = -1;
@@ -96,13 +96,13 @@ inline int Dictionnary::linearSearch(const string & prefix) const
 	}
 	return index;
 }
-
+/*
 inline int Dictionnary::binaryTreeSearch(const string & prefix) const
 {
 	//cout << "Searchin in Tree " << endl;
 	return this->tree.getPrefixFirstIndex(prefix);
 }
-
+*/
 inline int Dictionnary::binarySearch(const string & prefix) const
 {
     int range = this->wordsNumber_ / 2;
@@ -124,7 +124,7 @@ inline int Dictionnary::binarySearch(const string & prefix) const
 		{
         	idx -= 1;
 		}
-        while (prefix > this->words_[idx] && idx < (this->wordsNumber_-1))
+        while (prefix > this->words_[idx] && idx < int(this->wordsNumber_-1))
 		{
             idx += 1;
 		}
@@ -134,17 +134,17 @@ inline int Dictionnary::binarySearch(const string & prefix) const
     	idx = -1;
     return idx;
 }
-
+/*
 const Tree * Dictionnary::findFirstNodeOfPrefix(const string & prefix) const
 {
 	return tree.nodeSearch(prefix);
 }
-
+*/
 int Dictionnary::findFirstIndexOfPrefix(const string & prefix) const
 {
 	//int index = linearSearch(prefix);
-	//int index = binarySearch(prefix);
-	int index = binaryTreeSearch(prefix);
+	int index = binarySearch(prefix);
+	//int index = binaryTreeSearch(prefix);
 	/*
 	if (index != index2)
 	{
@@ -167,8 +167,8 @@ void Dictionnary::readfile(string filename)
 	// Charge le fichier dictionnaire et remplit le vecteur words avec les mots de longueur wordSize
 	ifstream DICT ;
 
-	string full_filename = "dicts/" + filename;
-	//cout << "Loading file : " << full_filename << "..." << endl ;
+	string full_filename = filename;
+	cout << "Loading dictionary file : " << full_filename << "..." << endl ;
 	DICT.open( full_filename.c_str(), ifstream::in ) ;
 	if ( DICT.fail() )
 	{
@@ -186,7 +186,7 @@ void Dictionnary::readfile(string filename)
 			words_.push_back( word ) ;
 		}
 	}
-	//cout << " containing : " << wordsNumber_ << " " << wordsSize_ << "-letters words" << endl ;
+	cout << " Dictionary has : " << wordsNumber_ << " " << wordsSize_ << "-letters words" << endl ;
 
 
 	if ( wordsNumber_ == 0 )
