@@ -18,6 +18,8 @@ class Parameters
 {
 public:
 	void read_parameters_from_txt_file(const string & filepath);
+	string get_parameter(const string & parameter_name) const;
+	bool parameter_exists(const string & parameter_name) const;
 	void display_parameters() const;
 private:
 	void read_parameter_name();
@@ -27,6 +29,18 @@ private:
 	string my_parameter_name;
 	string my_parameter_value;
 };
+
+bool Parameters::parameter_exists(const string & parameter_name) const
+{
+	auto it = parameters_map.find(parameter_name);
+	return it != parameters_map.end();
+}
+
+string Parameters::get_parameter(const string & parameter_name) const
+{
+	auto it = parameters_map.find(parameter_name);
+	return it->second;
+}
 
 void Parameters::display_parameters() const
 {
@@ -38,28 +52,34 @@ void Parameters::display_parameters() const
 
 void Parameters::read_parameter_name()
 {
-	cout << "Reading parameter name" << endl;
+	cout << "Reading parameter name : ";
 	my_opened_file >> my_parameter_name;
+			
 	cout << my_parameter_name << endl;
 }
 
 void Parameters::read_parameter_value()
 {
-	cout << "Reading parameter value" << endl;
+	//cout << "Reading parameter value" << endl;
 	my_opened_file >> my_parameter_value;
 	parameters_map[my_parameter_name] = my_parameter_value;
-	cout << my_parameter_value << endl;
+	//cout << my_parameter_value << endl;
 }
 
 void Parameters::read_parameters_from_txt_file(const string & filepath)
 {
 	cout << "Opening file " << filepath << endl;
 	my_opened_file.open(filepath.c_str());
-	while (!my_opened_file.eof())
+	while (my_opened_file)
 	{
-		read_parameter_name();
 		if (my_opened_file.eof())
-			throw "Missing parameter value in input file";
+			cout << "Fin de fichier avant lecture parameter_name" << endl;
+		read_parameter_name();
+		if (parameter_exists(my_parameter_name))
+			if (my_opened_file.eof())
+				break;
+		if (my_opened_file.eof())
+			throw "Missing parameter value when reading input file";
 		read_parameter_value();
 	}
 	cout << "Closing file " << filepath << endl;
