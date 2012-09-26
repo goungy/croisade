@@ -10,14 +10,14 @@
 #include <stdlib.h>
 #include "Parameters.h"
 #include "SolverBuilder.h"
+
 int main(void) {
 	try
 	{
-		Parameters parameters;
-		parameters.read_parameters_from_txt_file("data/parameters.txt");
-		parameters.display_parameters();
-		SolverBuilder solver_builder;
-		ISolver & my_solver = solver_builder.build_solver(parameters);
+		SolverDirector solver_director("data/parameters.txt");
+		ISolver & my_solver = solver_director.build_solver();
+		my_solver.execute_solver();
+		cout << "Done" << endl;
 	}
 	catch(const char * e)
 	{

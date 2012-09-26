@@ -4,4 +4,5 @@ solver_type Stephane
 saved_solver_state_version 0.1
 saved_solver_state_date None
 saved_solver_state_instances None
+saved_solver_state_prefix_size 3
 
