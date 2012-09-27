@@ -23,7 +23,7 @@ Dictionnary::Dictionnary(string filename, int word_size)
 	wordsSize_ = word_size ;
 	this->readfile(filename);
 	sort(this->words_.begin(),this->words_.end());
-	//this->tree.create_tree(this->words_);
+	this->tree.create_tree(this->words_);
 	//this->shared_prefix.resize(this->wordsNumber_);
 	//for (unsigned int i = 0 ; i < this->wordsNumber_ ;i++)
 	//	this->shared_prefix[i].assign(word_size,-1);
@@ -96,13 +96,13 @@ inline int Dictionnary::linearSearch(const string & prefix) const
 	}
 	return index;
 }
-/*
+
 inline int Dictionnary::binaryTreeSearch(const string & prefix) const
 {
 	//cout << "Searchin in Tree " << endl;
 	return this->tree.getPrefixFirstIndex(prefix);
 }
-*/
+
 inline int Dictionnary::binarySearch(const string & prefix) const
 {
     int range = this->wordsNumber_ / 2;
@@ -134,17 +134,17 @@ inline int Dictionnary::binarySearch(const string & prefix) const
     	idx = -1;
     return idx;
 }
-/*
+
 const Tree * Dictionnary::findFirstNodeOfPrefix(const string & prefix) const
 {
 	return tree.nodeSearch(prefix);
 }
-*/
+
 int Dictionnary::findFirstIndexOfPrefix(const string & prefix) const
 {
 	//int index = linearSearch(prefix);
-	int index = binarySearch(prefix);
-	//int index = binaryTreeSearch(prefix);
+	//int index = binarySearch(prefix);
+	int index = binaryTreeSearch(prefix);
 	/*
 	if (index != index2)
 	{

@@ -1,4 +1,4 @@
-CXXFLAGS =	-O3 -Wall -fmessage-length=0 -std=c++0x  -Iinc/ 
+CXXFLAGS =	-O3 -Wall -Wextra -fmessage-length=0 -std=c++0x  -Iinc/ 
 
 INCS = $(wildcard inc/*.h)
 
