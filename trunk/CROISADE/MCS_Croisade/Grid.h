@@ -32,4 +32,25 @@ public:
 	int word_size;
 };
 
+
+inline void Grid::put_word_in_row(const string & word, int idx, int row)
+{
+	this->rows[row] = word;
+	this->rows_idx[row] = idx;
+	for (int i = 0 ; i < word_size ; i++)
+	{
+		this->cols[i][row] = word[i];
+	}
+}
+
+inline void Grid::put_word_in_col(const string & word,int idx, int col)
+{
+	this->cols[col] = word;
+	this->cols_idx[col] = idx;
+	for (int i = 0 ; i < word_size ; i++)
+	{
+		this->rows[i][col] = word[i];
+	}
+}
+
 #endif /* GRID_H_ */

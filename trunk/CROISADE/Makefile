@@ -1,4 +1,6 @@
-CXXFLAGS =	-O3 -Wall -Wextra -fmessage-length=0 -std=c++0x  -Iinc/ 
+#PROFILE = -g -pg
+PROFILE = -g 
+CXXFLAGS = $(PROFILE)	-O3 -Wall -Wextra -fmessage-length=0 -std=c++0x  -Iinc/ 
 
 INCS = $(wildcard inc/*.h)
 
