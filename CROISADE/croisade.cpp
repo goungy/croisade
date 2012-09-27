@@ -8,8 +8,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "Parameters.h"
-#include "SolverBuilder.h"
+#include "SolverDirector.h"
 
 int main(void) {
 	try
