@@ -23,28 +23,26 @@ public:
 	}
 	virtual void execute_stage() = 0;
 	void link_to_next_stage(SolverStage * stage){ this->next_stage = stage;}
-	static void update_row_previous_trees(int row, const string & word, const Dictionnary * dico)
+	static bool update_row_previous_trees(int row, const string & word, const Dictionnary * dico)
 	{
 		vector<const Tree *> & row_to_update = previous_trees[row];
-		if (row == 0)
 			for(int col_idx = 0 ; col_idx < int(row_to_update.size()) ; col_idx++)
 			{
 				//cout << "Updating " << row << "x"<<col_idx << endl;
-				const Tree * node = dico->tree.no_check_get_node(word[col_idx]);
-				if (!node) throw "Error : prefix not found as it should be when updating previous_trees";
+				const Tree * node = 0;
+				if (row == 0)
+					node = dico->tree.no_check_get_node(word[col_idx]);
+				else
+					node = previous_trees[row-1][col_idx]->no_check_get_node(word[col_idx]);
+				if (!node)	return false;
 				row_to_update[col_idx] = node;
 			}
-		else
-			for(int col_idx = 0 ; col_idx < int(row_to_update.size()) ; col_idx++)
-			{
-				//cout << "Updating " << row << "x"<<col_idx << endl;
-				row_to_update[col_idx] = previous_trees[row-1][col_idx]->no_check_get_node(word[col_idx]);
-			}
+		return true;
 	}
 	static void initialize_previous_trees(int word_size)
 	{
 		if (previous_trees.size() != 0)
-			if (previous_trees.size() != word_size)
+			if (int(previous_trees.size()) != word_size)
 				throw "Trying to resize previously sized previous_trees to another size, which is forbidden for now!";
 
 		previous_trees.resize(word_size);
@@ -83,13 +81,14 @@ public:
 	{
 		for(int idx = start_idx ; idx <= last_idx ; idx++)
 		{
+			if (idx == 100) break;
 			const string & word = this->my_dico_ptr->get_word_from_index(idx);
 			this->my_grid_ref.put_word_in_row(word, idx, this->row);
 			//if (row == 0 )
 			//	this->my_grid_ref.print();
 				cout << "Placing word " << idx << " in row " << row << endl;
-			update_row_previous_trees(row, word, my_dico_ptr);
-			next_stage->execute_stage();
+			if (update_row_previous_trees(row, word, my_dico_ptr))
+				next_stage->execute_stage();
 		}
 	}
 protected:
@@ -106,7 +105,9 @@ public:
 	:SimpleRowWordPlacerStage(dico_ptr, grid, start_idx, last_idx, row),
 	 first_col_to_check(first_col_to_check), last_col_to_check(last_col_to_check)
 	{
+
 	}
+
 	void execute_stage()
 	{
 		/*
@@ -120,15 +121,19 @@ public:
 		for(int idx = start_idx ; idx <= last_idx ; idx++)
 		{
 			const string & word = this->my_dico_ptr->get_word_from_index(idx);
-
+			SolverStage & next_stage_ref = *next_stage;
+			vector<const Tree *> & my_previous_trees = previous_trees[row-1];
+			vector<const Tree *> & next_previous_trees = previous_trees[row];
 			bool word_ok = true;
-			for (int col_idx = first_col_to_check ; col_idx <= last_col_to_check && word_ok ; col_idx++)
+			for (int col_idx = first_col_to_check ; col_idx <= last_col_to_check && word_ok; col_idx++)
 			{
 				//cout << "Testing prefix " << prefix << " for row " << this->row << " and col " << col_idx << " for word " << word << endl;
 				//cout << "Previous_trees sizes : " << previous_trees.size() << endl;
 				//cout << "Row prev trees size : " << previous_trees[row].size() << endl;
 				//cout << "Getting next node from " << row << "x" << col_idx << endl;
-				word_ok = (previous_trees[row-1][col_idx]->no_check_get_node(word[col_idx]) != 0);
+				const Tree * prev_tree = my_previous_trees[col_idx]->no_check_get_node(word[col_idx]);
+				next_previous_trees[col_idx] = prev_tree;
+				word_ok = prev_tree;
 			}
 			if (word_ok)
 			{
@@ -136,8 +141,8 @@ public:
 				//if (row == 2 )
 				//	this->my_grid_ref.print();
 				//cout << "Placing word " << idx << " in row " << row << endl;
-				update_row_previous_trees(row, word, my_dico_ptr);
-				next_stage->execute_stage();
+				//update_row_previous_trees(row, word, my_dico_ptr);
+				next_stage_ref.execute_stage();
 			}
 		}
 	}
