@@ -14,16 +14,17 @@ using namespace std;
 
 bool Grid::word_already_in_grid(int rows, int cols,const string & word, int idx)
 {
-	/*
+
 	if (count(this->rows.begin(),this->rows.begin()+rows,word) >= 1)
 		return true;
 	if (count(this->cols.begin(),this->cols.begin()+cols,word) >= 1)
 		return true;
-		*/
+/*
 	if (count(this->rows_idx.begin(),this->rows_idx.begin()+rows,idx) >= 1)
 		return true;
 	if (count(this->cols_idx.begin(),this->cols_idx.begin()+cols,idx) >= 1)
 		return true;
+		*/
 	return false;
 }
 
