@@ -18,6 +18,7 @@ using namespace std;
 class ISolver
 {
 public:
+	virtual ~ISolver(){}
 	virtual int get_word_size() const = 0;
 	virtual void execute_solver() = 0;
 };
@@ -34,12 +35,6 @@ protected:
 	{
 		this->solver_stages.push_back(new_stage);
 	}
-	void link_solver_stages()
-	{
-		for(auto it = solver_stages.begin() ; it != (solver_stages.end()-1) ; it++)
-			(*it)->link_to_next_stage(*(it+1));
-		solver_stages.back()->link_to_next_stage(new DummyStage(my_dico_ptr, my_grid));
-	}
 	const Dictionnary * my_dico_ptr;
 	vector< SolverStage *> solver_stages;
 	Grid my_grid;
@@ -49,25 +44,44 @@ class StephaneSolver : public BaseSolver
 {
 public:
 	StephaneSolver(const Dictionnary * dico, const Parameters & parameters)
-	: BaseSolver(dico)
+	: BaseSolver(dico),
+	  my_mediator(atoi(parameters.get_parameter("saved_solver_state_prefix_size").c_str()), dico->wordsSize_)
 	{
 		my_prefix_max_size = atoi(parameters.get_parameter("saved_solver_state_prefix_size").c_str());
 		this->check_max_prefix_size();
 		int start_idx = 0;
 		int last_idx = my_dico_ptr->wordsNumber_-1;
-		this->add_stage(new SimpleRowWordPlacerStage(my_dico_ptr, my_grid, start_idx, last_idx, 0));
+		cout << "Stephane solver adding 1st row placer" << endl;
+		SimpleRowWordPlacerStage * first_r = new SimpleRowWordPlacerStage(my_dico_ptr, my_grid, &my_mediator, start_idx, last_idx, 0);
+		first_row = first_r;
+		my_mediator.register_stage(first_r);
 		for (int i = 1 ; i < my_prefix_max_size ; i++)
 		{
 			int first_col_to_check = 0;
 			int last_col_to_check = this->get_word_size()-1;
-			this->add_stage(new SimpleRowWordTryAndCheckStage(my_dico_ptr, my_grid, start_idx, last_idx, i, first_col_to_check, last_col_to_check));
+			cout << "Stephane solver adding "<< i << " row try and check" << endl;
+			my_mediator.register_stage(new SimpleRowWordTryAndCheckStage(my_dico_ptr, my_grid, &my_mediator,start_idx, last_idx, i, first_col_to_check, last_col_to_check));
 		}
-		this->link_solver_stages();
+		int first_row_to_check = my_prefix_max_size;
+		int last_row_to_check = this->get_word_size()-1;
+		cout << "Stephane solver adding 1st col prefix placer" << endl;
+		my_mediator.register_stage(new ColWordPrefixTryStage(my_dico_ptr, my_grid, &my_mediator,start_idx, last_idx, 0, first_row_to_check, last_row_to_check, my_prefix_max_size));
+		for(int i = 1; i < this->get_word_size() ; i++)
+		{
+			int first_row_to_check = my_prefix_max_size;
+			int last_row_to_check = this->get_word_size()-1;
+			cout << "Stephane solver adding "<< i<< " col prefix try and check placer" << endl;
+			my_mediator.register_stage(new ColWordPrefixTryAndCheckStage(my_dico_ptr, my_grid, &my_mediator,start_idx, last_idx, i, first_row_to_check, last_row_to_check, my_prefix_max_size));
+		}
+
+		checker_stage = new GridCheckerStage(my_dico_ptr, my_grid);
+		my_mediator.register_stage(checker_stage);
 	}
 	void execute_solver()
 	{
-		cout << "There are " << this->solver_stages.size() << " solver stages" << endl;
-		solver_stages[0]->execute_stage();
+		//cout << "There are " << this->solver_stages.size() << " solver stages" << endl;
+		first_row->execute_stage();
+		cout << "Found " << checker_stage->get_grids_found_count() << " grids" << endl;
 	}
 protected:
 private:
@@ -78,6 +92,9 @@ private:
 	}
 
 	int my_prefix_max_size;
+	SolverStage * first_row;
+	StephaneSolverMediator my_mediator;
+	GridCheckerStage* checker_stage;
 };
 
 

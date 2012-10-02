@@ -6,7 +6,8 @@
 // Description : Hello World in C, Ansi-style
 //============================================================================
 
-#include <stdio.h>
+#include <iostream>
+using namespace std;
 #include <stdlib.h>
 #include "SolverDirector.h"
 
