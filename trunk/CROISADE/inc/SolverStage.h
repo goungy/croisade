@@ -8,60 +8,98 @@
 #ifndef SOLVERSTAGE_H_
 #define SOLVERSTAGE_H_
 
+#include <map>
 #include <iostream>
 using namespace std;
 
 #include "Grid.h"
+#include "Dictionnary.h"
+#include "SolverMediator.h"
+
+class WordIntervalStage
+{
+public:
+	WordIntervalStage(int start_idx, int last_idx, int row_or_col);
+	int get_first_word_idx() const;
+	int get_last_word_idx() const;
+	int get_row_or_col() const;
+private:
+	int start_idx;
+	int last_idx;
+	int row_or_col;
+};
+
+class ISolverMediator;
 
 class SolverStage
 {
 public:
-	SolverStage(const Dictionnary * dico_ptr, Grid & grid):
-		my_dico_ptr(dico_ptr), my_grid_ref(grid),next_stage(0)
-	{
-		initialize_previous_trees(dico_ptr->wordsSize_);
-	}
+	virtual ~SolverStage();
+	SolverStage(const Dictionnary * dico_ptr, Grid & grid, ISolverMediator * med);
 	virtual void execute_stage() = 0;
-	void link_to_next_stage(SolverStage * stage){ this->next_stage = stage;}
-	static bool update_row_previous_trees(int row, const string & word, const Dictionnary * dico)
-	{
-		vector<const Tree *> & row_to_update = previous_trees[row];
-			for(int col_idx = 0 ; col_idx < int(row_to_update.size()) ; col_idx++)
-			{
-				//cout << "Updating " << row << "x"<<col_idx << endl;
-				const Tree * node = 0;
-				if (row == 0)
-					node = dico->tree.no_check_get_node(word[col_idx]);
-				else
-					node = previous_trees[row-1][col_idx]->no_check_get_node(word[col_idx]);
-				if (!node)	return false;
-				row_to_update[col_idx] = node;
-			}
-		return true;
-	}
-	static void initialize_previous_trees(int word_size)
-	{
-		if (previous_trees.size() != 0)
-			if (int(previous_trees.size()) != word_size)
-				throw "Trying to resize previously sized previous_trees to another size, which is forbidden for now!";
-
-		previous_trees.resize(word_size);
-		for (auto it = previous_trees.begin() ; it != previous_trees.end() ; it++)
-			it->resize(word_size);
-	}
+	ISolverMediator * get_my_mediator();
+	const Dictionnary * get_dico_ptr() const;
+	Grid & get_grid_ref() const;
+	const string & get_current_word() const;
+	void put_word_in_row(const string & word, int word_idx, int row);
+	void put_word_in_column(const string & word, int word_idx, int col);
 protected:
+	void set_current_word(const string & word);
+private:
 	const Dictionnary * my_dico_ptr;
 	Grid & my_grid_ref;
-	SolverStage * next_stage;
-	static vector< vector<const Tree *> >previous_trees;
+	ISolverMediator * my_mediator;
+	string current_word;
 };
 
-vector< vector<const Tree *> > SolverStage::previous_trees;
+class GridCheckerStage:public SolverStage
+{
+public:
+	GridCheckerStage(const Dictionnary * dico_ptr, Grid & grid):
+		SolverStage(dico_ptr,grid,0), grids_found_count(0)
+	{
+	}
+	void execute_stage()
+	{
+		bool grid_ok = true;
+		int word_size = get_grid_ref().get_word_size();
+		for(int i = 0 ; i < word_size && grid_ok; i++)
+		{
+			const string word = get_grid_ref().get_prefix_in_row(i, word_size);
+			grid_ok = get_dico_ptr()->findFirstNodeOfPrefix(word);
+			if (!grid_ok)
+				cout << "word " << word << " does not exist in row " << i << endl;
+		}
+		for(int i = 0 ; i < word_size && grid_ok; i++)
+		{
+			const string word = get_grid_ref().get_prefix_in_column(i, word_size);
+			grid_ok = get_dico_ptr()->findFirstNodeOfPrefix(word);
+			if (!grid_ok)
+				cout << "word " << word << " does not exist in column " << i << endl;
+		}
+		if (grid_ok)
+			grid_ok = get_grid_ref().check_no_doublons_in_grid();
+		cout << "Grid ok = " << grid_ok << endl;
+		get_grid_ref().print();
+		exit(0);
+		if (grid_ok)
+		{
+			//cout << "Words in grid ok" << endl;
+			get_grid_ref().print();
+			grids_found_count++;
+			exit(0);
+		}
+		//get_grid_ref().print();
+	}
+	int get_grids_found_count()const {return grids_found_count;}
+private:
+	int grids_found_count;
+};
 
 class DummyStage : public SolverStage
 {
 public:
-	DummyStage(const Dictionnary * dico_ptr, Grid & grid):SolverStage(dico_ptr, grid)
+	DummyStage(const Dictionnary * dico_ptr, Grid & grid):SolverStage(dico_ptr, grid, 0)
 	{}
 	void execute_stage()
 	{
@@ -69,90 +107,104 @@ public:
 	}
 };
 
-class SimpleRowWordPlacerStage : public SolverStage
+class PreviousTreeHolder
 {
 public:
-	SimpleRowWordPlacerStage(const Dictionnary * dico_ptr, Grid & grid, int start_idx, int last_idx, int row):
-		SolverStage(dico_ptr,grid),start_idx(start_idx), last_idx(last_idx), row(row)
+	PreviousTreeHolder(const Dictionnary * dico):
+		previous_trees(dico->wordsSize_), my_dico(dico)
+	{}
+	bool update_previous_trees_first_letter(const string & word)
 	{
+		//cout << "Updating THE previous tree first letter with word " << word << endl;
+		for(unsigned int i = 0 ; i < previous_trees.size() ; i++)
+		{
+			//cout << "Ok for " << i << endl;
+			const Tree* tree = my_dico->tree.get_node(word[i]);
+			if (!tree)
+				return false;
+			//cout << "Ok for " << i << endl;
+			previous_trees[i] = tree;
+			//cout << "Ok for " << i << endl;
+		}
+		return true;
 	}
 
-	void execute_stage()
+	bool update_previous_trees_letter(const string & word, const PreviousTreeHolder * other_trees)
 	{
-		for(int idx = start_idx ; idx <= last_idx ; idx++)
+		for(unsigned int i = 0 ; i < previous_trees.size() ; i++)
 		{
-			if (idx == 100) break;
-			const string & word = this->my_dico_ptr->get_word_from_index(idx);
-			this->my_grid_ref.put_word_in_row(word, idx, this->row);
-			//if (row == 0 )
-			//	this->my_grid_ref.print();
-				cout << "Placing word " << idx << " in row " << row << endl;
-			if (update_row_previous_trees(row, word, my_dico_ptr))
-				next_stage->execute_stage();
+			previous_trees[i] = ((other_trees->get_previous_trees())[i])->no_check_get_node(word[i]);
+			if (!previous_trees[i])
+				return false;
 		}
+		return true;
 	}
-protected:
-	int start_idx;
-	int last_idx;
-	int row;
+	const vector< const Tree * > & get_previous_trees() const{return previous_trees;}
+private:
+	vector< const Tree * > previous_trees;
+	const Dictionnary * my_dico;
 };
 
-class SimpleRowWordTryAndCheckStage : public SimpleRowWordPlacerStage
+class SimpleRowWordPlacerStage : public SolverStage, public WordIntervalStage, public PreviousTreeHolder
 {
 public:
-	SimpleRowWordTryAndCheckStage(const Dictionnary * dico_ptr, Grid & grid,
-			int start_idx, int last_idx, int row, int first_col_to_check, int last_col_to_check)
-	:SimpleRowWordPlacerStage(dico_ptr, grid, start_idx, last_idx, row),
-	 first_col_to_check(first_col_to_check), last_col_to_check(last_col_to_check)
-	{
+	SimpleRowWordPlacerStage(const Dictionnary * dico_ptr, Grid & grid, ISolverMediator * med,
+			int start_idx, int last_idx, int row);
 
-	}
+	void execute_stage();
+};
 
-	void execute_stage()
-	{
-		/*
-		vector<const Tree * > col_prefix_in_tree(last_col_to_check-first_col_to_check+1);
-		for (int col_idx = first_col_to_check ; col_idx <= last_col_to_check ; col_idx++)
-		{
-			const string grid_prefix = my_grid_ref.get_prefix_in_column(col_idx, row);
-			col_prefix_in_tree[col_idx] = this->my_dico_ptr->findFirstNodeOfPrefix(grid_prefix);
-		}
-		*/
-		for(int idx = start_idx ; idx <= last_idx ; idx++)
-		{
-			const string & word = this->my_dico_ptr->get_word_from_index(idx);
-			SolverStage & next_stage_ref = *next_stage;
-			vector<const Tree *> & my_previous_trees = previous_trees[row-1];
-			vector<const Tree *> & next_previous_trees = previous_trees[row];
-			bool word_ok = true;
-			for (int col_idx = first_col_to_check ; col_idx <= last_col_to_check && word_ok; col_idx++)
-			{
-				//cout << "Testing prefix " << prefix << " for row " << this->row << " and col " << col_idx << " for word " << word << endl;
-				//cout << "Previous_trees sizes : " << previous_trees.size() << endl;
-				//cout << "Row prev trees size : " << previous_trees[row].size() << endl;
-				//cout << "Getting next node from " << row << "x" << col_idx << endl;
-				const Tree * prev_tree = my_previous_trees[col_idx]->no_check_get_node(word[col_idx]);
-				next_previous_trees[col_idx] = prev_tree;
-				word_ok = prev_tree;
-			}
-			if (word_ok)
-			{
-				this->my_grid_ref.put_word_in_row(word, idx, this->row);
-				//if (row == 2 )
-				//	this->my_grid_ref.print();
-				//cout << "Placing word " << idx << " in row " << row << endl;
-				//update_row_previous_trees(row, word, my_dico_ptr);
-				next_stage_ref.execute_stage();
-			}
-		}
-	}
-
-
+class IntervalCheckerStage
+{
+public:
+	IntervalCheckerStage(int first_col_to_check, int last_col_to_check):
+		first_col_to_check(first_col_to_check), last_col_to_check(last_col_to_check){}
+	int get_first_index_to_check() const { return first_col_to_check;}
+	int get_last_index_to_check() const { return last_col_to_check;}
 private:
 	int first_col_to_check;
 	int last_col_to_check;
 };
 
+class SimpleRowWordTryAndCheckStage :
+	public SolverStage, public WordIntervalStage, public IntervalCheckerStage, public PreviousTreeHolder
+{
+public:
+	SimpleRowWordTryAndCheckStage(const Dictionnary * dico_ptr, Grid & grid, ISolverMediator * med,
+			int start_idx, int last_idx, int row, int first_col_to_check, int last_col_to_check);
+	void execute_stage();
+};
+
+class ColWordPrefixTryStage : public SolverStage,
+public WordIntervalStage, public IntervalCheckerStage, public PreviousTreeHolder
+{
+public:
+	ColWordPrefixTryStage(const Dictionnary * dico_ptr, Grid & grid, ISolverMediator * med,
+			int start_idx, int last_idx, int col, int first_col_to_check, int last_col_to_check,
+			int prefix_size);
+	void execute_stage();
+	int get_prefix_size() const {return prefix_size;}
+protected:
+	static map<string,vector<int> > prefix_map;
+private:
+	int prefix_size;
+
+};
+
+
+
+class ColWordPrefixTryAndCheckStage : public ColWordPrefixTryStage
+{
+public:
+	ColWordPrefixTryAndCheckStage(const Dictionnary * dico_ptr, Grid & grid,ISolverMediator * med,
+			int start_idx, int last_idx, int col, int first_col_to_check, int last_col_to_check,
+			int prefix_size);
+
+	void execute_stage();
+
+protected:
+private:
+};
 
 
 #endif /* SOLVERSTAGE_H_ */
