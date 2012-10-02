@@ -79,15 +79,15 @@ public:
 		}
 		if (grid_ok)
 			grid_ok = get_grid_ref().check_no_doublons_in_grid();
-		cout << "Grid ok = " << grid_ok << endl;
-		get_grid_ref().print();
-		exit(0);
+		//cout << "Grid ok = " << grid_ok << endl;
+		//get_grid_ref().print();
+		//exit(0);
 		if (grid_ok)
 		{
 			//cout << "Words in grid ok" << endl;
-			get_grid_ref().print();
+			//get_grid_ref().print();
 			grids_found_count++;
-			exit(0);
+			//exit(0);
 		}
 		//get_grid_ref().print();
 	}

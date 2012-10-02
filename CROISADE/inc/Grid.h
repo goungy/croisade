@@ -10,7 +10,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-
+#include <algorithm>
 using namespace std;
 class Grid {
 public:
@@ -20,13 +20,14 @@ public:
 	bool check_no_doublons_in_grid() const
 	{
 		bool no_doublon = true;
-		cout << "CHECK NO DOUBLONS" << endl;
+		//cout << "CHECK NO DOUBLONS" << endl;
 		for (int i = 0 ; i < int(get_word_size()) && no_doublon; i++)
 		{
-			cout << "For i = " << i << endl;
+			   //cout << "For i = " << i << endl;
 			const string & word = cols[i];
-			cout << "Checking " << word << endl;
-			no_doublon = !this->word_already_in_grid(get_word_size(), get_word_size(), word , cols_idx[i]);
+			//cout << "Checking " << word << endl;
+			no_doublon = (count(this->rows.begin(),this->rows.end(),word) +
+					count(this->cols.begin(),this->cols.end(),word)) == 1;
 		}
 		return no_doublon;
 	}

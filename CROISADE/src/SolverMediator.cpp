@@ -49,8 +49,8 @@ void StephaneSolverMediator::notify_stage_finished(const ColWordPrefixTryStage *
 {
 	//cout << "Need to notify second col " << endl;
 	//cout << "col 1" << endl;
-	//solver_stage->get_grid_ref().print();
 	bool ok = col_stages[0]->update_previous_trees_first_letter(solver_stage->get_current_word());
+	//solver_stage->get_grid_ref().print();
 	if (ok) col_stages[0]->execute_stage();
 }
 
@@ -63,7 +63,8 @@ void StephaneSolverMediator::notify_stage_finished(const ColWordPrefixTryAndChec
 	{
 		//cout << "col " << col << endl;
 		//solver_stage->get_grid_ref().print();
-		bool ok = col_stages[col]->update_previous_trees_first_letter(solver_stage->get_current_word());
+		const string & word = solver_stage->get_current_word();
+		bool ok = col_stages[col]->update_previous_trees_letter(word, solver_stage);
 		if (ok) col_stages[col]->execute_stage();
 	}else
 	{

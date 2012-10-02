@@ -155,13 +155,13 @@ void ColWordPrefixTryAndCheckStage::execute_stage()
 			bool word_ok = true;
 			for (int row_idx = get_first_index_to_check() ; row_idx <= get_last_index_to_check() && word_ok ; row_idx++)
 			{
-				cout << "Checking letter " << word[row_idx] << endl;
+				//cout << "Checking letter " << word[row_idx] << endl;
 				word_ok = (this->get_previous_trees()[row_idx]->no_check_get_node(word[row_idx]) != 0);
 			}
 			if (word_ok)
 			{
 				this->put_word_in_column(word, word_idx, get_row_or_col());
-				if (get_row_or_col() == 3)cout << "Placing word " << word << "[" << word_idx << "] in col " << get_row_or_col() << endl;
+				//if (get_row_or_col() == 3)cout << "Placing word " << word << "[" << word_idx << "] in col " << get_row_or_col() << endl;
 				this->get_my_mediator()->notify_stage_finished(this);
 			}
 		}
