@@ -30,6 +30,8 @@ SolverDirector::SolverDirector(const string & filepath)
 	my_solver_type = my_parameters.get_parameter("solver_type");
 	if (my_solver_type == "Stephane")
 		my_solver_builder = new StephaneSolverBuilder();
+	else
+		my_solver_builder = new ArthurSolverBuilder();
 }
 
 
