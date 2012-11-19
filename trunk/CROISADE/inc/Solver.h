@@ -26,7 +26,8 @@ public:
 class BaseSolver : public ISolver
 {
 public:
-	BaseSolver(const Dictionnary * dico):my_dico_ptr(dico), my_grid(dico->wordsSize_)
+	BaseSolver(const Dictionnary * dico):
+		my_dico_ptr(dico), my_grid(dico->wordsSize_),checker_stage(dico, my_grid)
 	{}
 	int get_word_size() const {return my_dico_ptr->wordsSize_;}
 	virtual void execute_solver() = 0;
@@ -38,6 +39,7 @@ protected:
 	const Dictionnary * my_dico_ptr;
 	vector< SolverStage *> solver_stages;
 	Grid my_grid;
+	GridCheckerStage checker_stage;
 };
 
 class StephaneSolver : public BaseSolver
@@ -73,15 +75,13 @@ public:
 			cout << "Stephane solver adding "<< i<< " col prefix try and check placer" << endl;
 			my_mediator.register_stage(new ColWordPrefixTryAndCheckStage(my_dico_ptr, my_grid, &my_mediator,start_idx, last_idx, i, first_row_to_check, last_row_to_check, my_prefix_max_size));
 		}
-
-		checker_stage = new GridCheckerStage(my_dico_ptr, my_grid);
-		my_mediator.register_stage(checker_stage);
+		my_mediator.register_stage(&checker_stage);
 	}
 	void execute_solver()
 	{
 		//cout << "There are " << this->solver_stages.size() << " solver stages" << endl;
 		first_row->execute_stage();
-		cout << "Found " << checker_stage->get_grids_found_count() << " grids" << endl;
+		cout << "Found " << checker_stage.get_grids_found_count() << " grids" << endl;
 	}
 protected:
 private:
@@ -94,9 +94,25 @@ private:
 	int my_prefix_max_size;
 	SolverStage * first_row;
 	StephaneSolverMediator my_mediator;
-	GridCheckerStage* checker_stage;
+
 };
 
+#include "OptimizedDataStructures.h"
 
+class ArthurSolver: public BaseSolver
+{
+public:
+	ArthurSolver(const Dictionnary * dico, const Parameters & parameters):
+		BaseSolver(dico), fixed_letters_tree(*dico, atoi(parameters.get_parameter("saved_solver_state_max_fixed_letters").c_str()))
+	{
+
+	}
+	void execute_solver()
+	{
+
+	}
+private:
+	FixedLettersRootNode fixed_letters_tree;
+};
 
 #endif /* SOLVER_H_ */

@@ -9,14 +9,10 @@ using namespace std;
 #include "Dictionnary.h"
 #include "Solver.h"
 
-class CheckManager
-{
-
-};
-
 class ISolverBuilder
 {
 public:
+	virtual ~ISolverBuilder(){}
 	virtual void read_dictionary(int word_size, const string & filepath) = 0;
 	virtual void check_code_version(double version) const = 0;
 	virtual double get_my_code_version() const = 0;
@@ -27,7 +23,7 @@ public:
 class BaseSolverBuilder : public ISolverBuilder
 {
 public:
-	BaseSolverBuilder(double code_version):my_code_version(code_version)
+	BaseSolverBuilder(double code_version):my_dico(0),my_code_version(code_version), my_solver(0)
 	{
 
 	}
@@ -67,10 +63,28 @@ public:
 
 	void create_solver(const Parameters & parameters)
 	{
+		const Dictionnary * my_dico = this->get_my_dictionnary();
+
 		this->my_solver = new StephaneSolver(this->get_my_dictionnary(), parameters);
 	}
 private:
 
 };
 
+class ArthurSolverBuilder : public BaseSolverBuilder
+{
+public:
+	ArthurSolverBuilder():BaseSolverBuilder(0.1)
+	{
+
+	}
+
+	void create_solver(const Parameters & parameters)
+	{
+
+		this->my_solver = new ArthurSolver(this->get_my_dictionnary(), parameters);
+	}
+private:
+
+};
 #endif

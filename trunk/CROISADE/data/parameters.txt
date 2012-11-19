@@ -1,8 +1,8 @@
-dictionary_file data/dicts/OGD_propres_linux.txt
-word_size 7 
-solver_type Stephane
+dictionary_file data/dicts/OGD_fusionne_linux.txt
+word_size 15 
+solver_type Arthur
 saved_solver_state_version 0.1
 saved_solver_state_date None
 saved_solver_state_instances None
-saved_solver_state_prefix_size 5
+saved_solver_state_max_fixed_letters 5
 
