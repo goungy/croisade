@@ -1,0 +1,1 @@
+Tentative to build an efficient finder for the crossword holy grail : the 10x10 perfect grid (no back case)
