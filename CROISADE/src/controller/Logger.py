@@ -13,6 +13,9 @@ class Logger(object):
 
 	@staticmethod
 	def log(msg, caller, loglevel = NORMAL):
+		if not Logger.logger_instance: 
+			print("[ERROR] one needs to call Logger.initialize_logger before calling Logger.log")
+			raise RuntimeError("Error: one needs to call Logger.initialize_logger before calling Logger.log")
 		Logger.logger_instance.log_instance(msg, caller, loglevel)
 
 	def __init__(self, loglevel = NORMAL):
