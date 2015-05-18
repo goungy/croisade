@@ -7,5 +7,5 @@ class Lexique(object):
 		self.word_length = int(word_length)
 		Logger.log("opening " + filepath, self)
 		with open(filepath) as f:
-			self.words = [ w for w in f if len(w.strip('\n')) == self.word_length ]
+			self.words = [ w.strip('\n') for w in f if len(w.strip('\n')) == self.word_length ]
 		Logger.log(str(len(self.words)) + " words of length " + str(self.word_length) + " loaded from " + self.filepath, self) 
