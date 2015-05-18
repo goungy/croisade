@@ -52,13 +52,19 @@ class WordStatistics(object):
                 self.absolute_statistics[line][column] = words_on_position
                 self.absolute_statistics[column][line] = words_on_position
         Logger.log("STATISTICS", self, loglevel = Logger.FINE)
-        min_line, min_column, min_number = 0, 0, self.absolute_statistics[0][0]
+        self.min_line, self.min_column, self.min_number = 0, 0, self.absolute_statistics[0][0]
         for line in range(self.word_length):
             for column in range(self.word_length):
                 Logger.log(str(line) + " " + str(column) + " " + str(self.absolute_statistics[line][column]), self, loglevel = Logger.FINE)
-                if min_number > self.absolute_statistics[line][column]:
-                    min_number, min_line, min_column = self.absolute_statistics[line][column], line, column
-        Logger.log("MINIMUM: " + str(min_line) + " " + str(min_column) + " " + str(min_number), self)
+                if self.min_number > self.absolute_statistics[line][column]:
+                    self.min_number, self.min_line, self.min_column = self.absolute_statistics[line][column], line, column
+        Logger.log("MINIMUM: " + str(self.min_line) + " " + str(self.min_column) + " " + str(self.min_number), self)
         Logger.log("VERSUS: 0 0 " + str(self.absolute_statistics[0][0]), self)
-        Logger.log("RATIO: " + str(self.absolute_statistics[min_line][min_column] / self.absolute_statistics[0][0]), self)
+        Logger.log("RATIO: " + str(self.absolute_statistics[self.min_line][self.min_column] / self.absolute_statistics[0][0]), self)
+        
+        self.workload_per_word = {}
+        for w in self.lexique.words:
+            self.workload_per_word[w] = self.position_letter_statistics[self.min_line][w[self.min_column]]
+            Logger.log(w + ": " + str(self.workload_per_word[w]) + " possibilities from line " + str(self.min_line) + " and column " + str(self.min_column), self, loglevel = Logger.FINE)
+    
                 
