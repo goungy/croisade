@@ -3,9 +3,11 @@ Created on 18 mai 2015
 
 @author: Jérôme
 '''
+import string
+from collections import OrderedDict
 from core.Lexique import Lexique
 from controller.Logger import Logger
-import string
+
 
 
 class WordStatistics(object):
@@ -67,4 +69,9 @@ class WordStatistics(object):
             self.workload_per_word[w] = self.position_letter_statistics[self.min_line][w[self.min_column]]
             Logger.log(w + ": " + str(self.workload_per_word[w]) + " possibilities from line " + str(self.min_line) + " and column " + str(self.min_column), self, loglevel = Logger.FINE)
     
+    def get_workload_for_word(self, word):
+        return self.workload_per_word[word]
+    
+    def return_ordered_workload_per_word(self):
+        return list(sorted(self.workload_per_word.items(), key=lambda t: t[1], reverse = True))
                 
