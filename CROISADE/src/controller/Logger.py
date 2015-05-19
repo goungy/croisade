@@ -4,6 +4,7 @@ class Logger(object):
 
 	FINE = 4
 	NORMAL = 5
+	ERROR = 10
 	
 	logger_instance = None
 
