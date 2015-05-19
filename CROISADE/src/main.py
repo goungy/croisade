@@ -1,35 +1,53 @@
+#slave: 
+# D:\workspace\croisade\CROISADE\src
+# c:\python34\python main.py --lex_file=..\data\lexiques\ultimate_556105.txt --word_size=10 --master_host=localhost --master_port=7070
+
+#master
+# D:\workspace\croisade\CROISADE\src
+# c:\python34\python main.py --lex_file=..\data\lexiques\ultimate_556105.txt --word_size=10 --master_host=localhost --master --master_port=7070
 import sys
+import argparse
 
 from core.Lexique import Lexique
 from core.statistics import WordStatistics
 from controller.Logger import Logger
+from core.master import Master
+from core.worker import Worker
 
 Logger.initialize_logger(loglevel = Logger.NORMAL)
 #Logger.initialize_logger(loglevel = Logger.FINE)
 
-lex_file = '../data/lexiques/ultimate_556105.txt'
-word_length = 12
+parser = argparse.ArgumentParser(description='Process arguments for croisade')
+parser.add_argument('--lex_file', required=True)
+parser.add_argument('--word_size', dest='word_size', required=True, type=int)
+parser.add_argument('--master_host', dest='master_host', required=True)
+parser.add_argument('--master_port', dest='master_port', required=True, type=int)
+parser.add_argument('--master', dest='be_master', action='store_true')
+args = parser.parse_args()
 
-if len(sys.argv) == 2:
-    word_length = sys.argv[1]
+lex_file = '../data/lexiques/ultimate_556105.txt'
+lex_file = args.lex_file
+
+word_length = 10
+word_length = args.word_size
+
+be_master = args.be_master
+
+master_host = '127.0.0.1'
+master_host = args.master_host
+
+master_port = 6969
+master_port = args.master_port
 
 l = Lexique(lex_file, word_length)
 word_statistics = WordStatistics(l)
 
-nb_workers = 4
-words_for_each_worker = [ [0, []] for i in range(nb_workers)]
-for w in l.words:
-    min_worker, min_workload = words_for_each_worker[0] , words_for_each_worker[0][0]
-    for worker in words_for_each_worker[1:]:
-        if min_workload > worker[0]: min_worker , min_workload = worker, worker[0]
-    min_worker[1].append(w)
-    min_worker[0] += word_statistics.workload_per_word[w]
+if be_master:
+    runner = Master(host = master_host, port = master_port)
+else:
+    runner = Worker(master_host, port = master_port)
 
-
-for idx,w in enumerate(words_for_each_worker):
-    print("worker " + str(idx) + ": " + str(w[0]) + " possibilities with " + str(len(w[1])) + " words")
-    sum += len(w[1])
-
+runner.run(l, word_statistics)
     
             
 
